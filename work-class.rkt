@@ -2,11 +2,18 @@
 ;IMPORTS
 (require "member-dto.rkt")
 (require "interp-service.rkt")
+
+
 ;CONSTANTS
 (define DEPTH_MAX_AST 3)
-(define OPERATIONS_IN_LANGUAGE '(+ -))
-(define TERMINALS_IN_LANGUAGE '(0 1 2 3 4 5 6 7 8 9 10))
-#|TODO'S
+(define NON_TERMINAL_SET '(+ -))
+(define TERMINAL_SET '(0 1 2 3 4 5 6 7 8 9 10))
+(define FULL_SET (append NON_TERMINAL_SET TERMINAL_SET))
+(define QTTY_POPULATION 100)
+
+
+#|----------------------------------------------------------------------------------------------------------------------------------------------------------------
+TODOS:
 
 1 Randomly create an initial population of programs from the available primitives. Initial and futures. 
 1.1 set data structure for support (attributes member, depth)
@@ -18,46 +25,43 @@ repeat
    4.2 Mutation
 until an acceptable solution is found or some other stopping condition is met (e.g., a maximum number of generations is reached).
 return the best-so-far individual (may be is necessary transform AST to concrete sintax).
-|#
+----------------------------------------------------------------------------------------------------------------------------------------------------------------|#
 
-;get-random-operations-list :: int list-> list (from OPERATIONS_IN_LANGUAGE)
-;return list (with size from DEPTH_MAX_AST param) with operations in that order
-(define (get-random-operations-list depth_max_ast init_list)
-  (if (zero? depth_max_ast)
-      init_list
-      (get-random-operations-list (sub1 depth_max_ast) (cons
-                                                        (list-ref OPERATIONS_IN_LANGUAGE (random (length OPERATIONS_IN_LANGUAGE)))
-                                                        init_list))
+;grow :: int -> ast
+;return ast from set available (with terminal and non-terminal nodes). Implement grow algorithm
+(define (grow depth)
+  (if (= depth DEPTH_MAX_AST)
+      (parse (list-ref TERMINAL_SET (random 0 (length TERMINAL_SET))))
+      (let [(selected_node (list-ref FULL_SET (random 0 (length FULL_SET))))]
+        (if (member selected_node TERMINAL_SET)
+            (parse selected_node)
+            (let [(l-branch (grow (add1 depth)))
+                  (r-branch (grow (add1 depth)))]
+              (if (equal? selected_node '+)
+                  (add l-branch r-branch)
+                  (sub l-branch r-branch))
+              )
+            )
+        )
       )
   )
 
 ;create-random-member :: (void) -> class-member-dto instance
 ;return a new instance for class-member-dto with random ast
 (define (create-random-member)
+  (new-instance class-member 0 (grow 1)))
 
-  ;create-random-ast :: int -> expr
-  (define (create-random-ast max_depth)
-    ;TODO iterate until depth is zero. Select quantity of operations for each depth grade
-    ;TODO create nodes necessary for each selected operation
-    (define (create-random-ast-depth depth ast)
-      (void)
-      )
-    
-    (add (num 1) (num 3)))
-
-  (new-instance class-member 0 (create-random-ast DEPTH_MAX_AST))
-  )
-
-;create_population :: int -> list of object-class-member (with random ast)
+;create_population :: int -> class-generation's object 
 ;function that generate population (or member list) with random ast or program
 (define (create-population qtty-members)
 
+  ;create-pop :: int list -> list
   (define (create-pop qtty init-pop)
-    (if (equal? qtty 0)
+    (if (= qtty 0)
         init-pop
         (create-pop (- qtty 1) (cons (create-random-member) init-pop))
         )
     )
-  
-  (create-pop qtty-members '()))
-
+  (let ([member-list (create-pop qtty-members '())])
+    (new-instance class-generation member-list '())
+    ))

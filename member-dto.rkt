@@ -23,4 +23,15 @@
 
 (define first-member (new-instance class-member 10 '(1 2 3)))
 
-(send 'get-fitness first-member)
+;(send 'get-fitness first-member)
+
+(define (class-generation member-list best-member)
+ (let ((member-list member-list)
+       (best-member best-member))     
+   (define (get-member-list) member-list)
+   (define (get-best-member) best-member)
+   (define (self message)
+     (cond ((eqv? message 'get-member-list) get-member-list)
+           ((eqv? message 'get-best-member) get-best-member)
+	   (else (error "Undefined message" message))))
+   self))
