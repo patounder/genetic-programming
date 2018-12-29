@@ -8,20 +8,23 @@
     (cond ((procedure? method) (apply method args))
           (else (error "Error in method lookup " method)))))
 
-(define (class-member fitness ast)
+(define (class-member fitness ast value)
  (let (
        (fitness fitness)
        (ast ast)
+       (value value)
        )     
    (define (get-fitness) fitness)
    (define (get-ast) ast)
+   (define (get-value) value)
    (define (self message)
      (cond ((eqv? message 'get-fitness) get-fitness)
            ((eqv? message 'get-ast) get-ast)
+           ((eqv? message 'get-value) get-value)
 	   (else (error "Undefined message" message))))
    self))
 
-(define first-member (new-instance class-member 10 '(1 2 3)))
+(define first-member (new-instance class-member 10 '(1 2 3) 10))
 
 ;(send 'get-fitness first-member)
 

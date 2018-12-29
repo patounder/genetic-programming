@@ -6,11 +6,22 @@
 
 ;CONSTANTS
 (define DEPTH_MAX_AST 3)
-(define NON_TERMINAL_SET '(+ -))
+(define NON_TERMINAL_SET '(+ - *))
 (define TERMINAL_SET '(0 1 2 3 4 5 6 7 8 9 10))
 (define FULL_SET (append NON_TERMINAL_SET TERMINAL_SET))
 (define QTTY_POPULATION 100)
+(define MAX_ITERATIONS 10)
+(define FIND_VALUE 19)
 
+;MACROS
+(defmac (my-while cond body)
+  (letrec ([iter (λ()
+                   (if cond
+                       (begin
+                         body
+                         (iter))
+                       (void)))])
+    (iter)))
 
 #|----------------------------------------------------------------------------------------------------------------------------------------------------------------
 TODOS:
@@ -18,7 +29,7 @@ TODOS:
 1 Randomly create an initial population of programs from the available primitives. Initial and futures. 
 1.1 set data structure for support (attributes member, depth)
 repeat
- 2 Execute each program and ascertain its fitness. Not compile, compile but result not ok, result ok. Use try catch. Count errors by step lexic, semantic, and so.
+ 2 Execute each program and ascertain its fitness. Not compile, compile but result not ok, result ok. Use try catch. Count errors by step lexic, semantic, and so on.
  3 Select one or two program(s) from the population with a probability based on fitness to participate in genetic operations (Section 2.3).
  4 Create new individual program(s) by applying genetic operations with specified probabilities (Section 2.4).
    4.1 Crossover
@@ -36,7 +47,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
         (if (member selected_node TERMINAL_SET)
             (parse selected_node)
             (let [(l-branch (grow (add1 depth)))
-                  (r-branch (grow (add1 depth)))]
+                  (r-branch (grow (add1 depth)))];In this case all operations (+ and -) use two branch, but in others is necessary evaluate 
               (if (equal? selected_node '+)
                   (add l-branch r-branch)
                   (sub l-branch r-branch))
@@ -49,7 +60,11 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;create-random-member :: (void) -> class-member-dto instance
 ;return a new instance for class-member-dto with random ast
 (define (create-random-member)
-  (new-instance class-member 0 (grow 1)))
+  (letrec ([ast (grow 1)]
+           [value (interp ast)]
+           [fitness 0])
+    (new-instance class-member fitness ast value))
+  )
 
 ;create_population :: int -> class-generation's object 
 ;function that generate population (or member list) with random ast or program
@@ -65,3 +80,18 @@ return the best-so-far individual (may be is necessary transform AST to concrete
   (let ([member-list (create-pop qtty-members '())])
     (new-instance class-generation member-list '())
     ))
+
+(define (main)
+  (letrec ([init-population (create-population QTTY_POPULATION)]
+           [chosen-generation init-population]
+           [actual-list-member '()]
+           [it 0])
+    (my-while (< it MAX_ITERATIONS)
+              (begin
+                ;2 Execute each program and ascertain its fitness. Not compile, compile but result not ok, result ok. Use try catch. Count errors by step lexic, semantic, and so on.
+                (set! actual-list-member (foldr (λ(member l)
+                                                  (cons (new-instance class-member 0 (send 'get-ast member) (interp (send 'get-ast member))) l))
+                                                '() (send 'get-member-list init-population)))
+                (set! it (add1 it))))
+    )
+  )
