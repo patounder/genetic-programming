@@ -7,11 +7,12 @@
 ;CONSTANTS
 (define DEPTH_MAX_AST 3)
 (define NON_TERMINAL_SET '(+ - *))
-(define TERMINAL_SET '(0 1 2 3 4 5 6 7 8 9 10))
+(define TERMINAL_SET '(1 2 5 7 9))
 (define FULL_SET (append NON_TERMINAL_SET TERMINAL_SET))
 (define QTTY_POPULATION 100)
-(define MAX_ITERATIONS 10)
+(define MAX_ITERATIONS 100)
 (define FIND_VALUE 19)
+(define INIT_BEST_FITNESS 10000)
 
 ;MACROS
 (defmac (my-while cond body)
@@ -57,39 +58,55 @@ return the best-so-far individual (may be is necessary transform AST to concrete
       )
   )
 
-;create-random-member :: (void) -> class-member-dto instance
+;create-random-member :: (void) -> class-member-dto's object
 ;return a new instance for class-member-dto with random ast
-(define (create-random-member)
-  (letrec ([ast (grow 1)]
+(define (create-random-member reference-value)
+  (letrec ([ast (grow 0)]
            [value (interp ast)]
-           [fitness 0])
+           [fitness (abs (- value reference-value))])
     (new-instance class-member fitness ast value))
   )
 
+;select-best-member :: list of member -> class-member-dto's object
+;return member with best fitness in generation
+(define (select-best-member member-list)
+  (let ([best-member (new-instance class-member INIT_BEST_FITNESS '() '())])
+    (begin
+      (for-each (λ(member)
+                  (when (< (send 'get-fitness member) (send 'get-fitness best-member))
+                    (set! best-member member)
+                    ))
+                member-list)
+      best-member)))
+
 ;create_population :: int -> class-generation's object 
 ;function that generate population (or member list) with random ast or program
-(define (create-population qtty-members)
+(define (create-population qtty-members reference-value)
 
   ;create-pop :: int list -> list
   (define (create-pop qtty init-pop)
     (if (= qtty 0)
         init-pop
-        (create-pop (- qtty 1) (cons (create-random-member) init-pop))
-        )
+        (create-pop (- qtty 1) (cons (create-random-member reference-value) init-pop)))
     )
-  (let ([member-list (create-pop qtty-members '())])
-    (new-instance class-generation member-list '())
+  
+  (letrec ([member-list (create-pop qtty-members '())]
+           [best-member (select-best-member member-list)])
+    (new-instance class-generation member-list best-member)
     ))
 
 (define (main)
-  (letrec ([init-population (create-population QTTY_POPULATION)]
-           [chosen-generation init-population]
+  (letrec ([init-population (create-population QTTY_POPULATION FIND_VALUE)]
+           [chosen-population init-population]
+           [best-member (send 'get-best-member chosen-population)]
            [actual-list-member '()]
            [it 0])
-    (my-while (< it MAX_ITERATIONS)
+    (send 'get-fitness best-member)
+    (send 'get-ast best-member)
+    #;(my-while (< it MAX_ITERATIONS)
               (begin
                 ;2 Execute each program and ascertain its fitness. Not compile, compile but result not ok, result ok. Use try catch. Count errors by step lexic, semantic, and so on.
-                (set! actual-list-member (foldr (λ(member l)
+                (set! actual-list-member (foldr (λ (member l)
                                                   (cons (new-instance class-member 0 (send 'get-ast member) (interp (send 'get-ast member))) l))
                                                 '() (send 'get-member-list init-population)))
                 (set! it (add1 it))))
