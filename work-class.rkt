@@ -9,20 +9,12 @@
 (define NON_TERMINAL_SET '(+ - *))
 (define TERMINAL_SET '(1 2 5 7 9))
 (define FULL_SET (append NON_TERMINAL_SET TERMINAL_SET))
-(define QTTY_POPULATION 100)
+(define QTTY_POPULATION 3)
 (define MAX_ITERATIONS 100)
 (define FIND_VALUE 19)
+(define QUANTITY_PARENTS 50)
+(define TOURNAMENT_NUMBER_ATTEMPTS 70)
 (define INIT_BEST_FITNESS 10000)
-
-;MACROS
-(defmac (my-while cond body)
-  (letrec ([iter (λ()
-                   (if cond
-                       (begin
-                         body
-                         (iter))
-                       (void)))])
-    (iter)))
 
 #|----------------------------------------------------------------------------------------------------------------------------------------------------------------
 TODOS:
@@ -38,6 +30,23 @@ repeat
 until an acceptable solution is found or some other stopping condition is met (e.g., a maximum number of generations is reached).
 return the best-so-far individual (may be is necessary transform AST to concrete sintax).
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------|#
+
+;main :: void -> void
+;execute programming genetic
+(define (main)
+  (letrec ([population (create-population QTTY_POPULATION FIND_VALUE)]
+           [chosen-population population]
+           [parent-list '()]
+           [it 0])
+    (my-while (and (> (send 'get-fitness (send 'get-best-member chosen-population)) 0) 
+                   (< it MAX_ITERATIONS)) 
+              (begin
+                (set! parent-list (select-parents population))
+                ;TODO reproduction, build new generation
+                ;TODO compare bestmember between chosen-population and new generation
+                ;
+                (void))
+              )))
 
 ;grow :: int -> ast
 ;return ast from set available (with terminal and non-terminal nodes). Implement grow algorithm
@@ -58,7 +67,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
       )
   )
 
-;create-random-member :: (void) -> class-member-dto's object
+;create-random-member :: (void) -> class-member-dto instance
 ;return a new instance for class-member-dto with random ast
 (define (create-random-member reference-value)
   (letrec ([ast (grow 0)]
@@ -67,7 +76,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
     (new-instance class-member fitness ast value))
   )
 
-;select-best-member :: list of member -> class-member-dto's object
+;select-best-member :: list of member -> class-member-dto instance
 ;return member with best fitness in generation
 (define (select-best-member member-list)
   (let ([best-member (new-instance class-member INIT_BEST_FITNESS '() '())])
@@ -79,7 +88,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
                 member-list)
       best-member)))
 
-;create_population :: int -> class-generation's object 
+;create_population :: int -> class-generation instance 
 ;function that generate population (or member list) with random ast or program
 (define (create-population qtty-members reference-value)
 
@@ -95,20 +104,65 @@ return the best-so-far individual (may be is necessary transform AST to concrete
     (new-instance class-generation member-list best-member)
     ))
 
-(define (main)
-  (letrec ([init-population (create-population QTTY_POPULATION FIND_VALUE)]
-           [chosen-population init-population]
-           [best-member (send 'get-best-member chosen-population)]
-           [actual-list-member '()]
-           [it 0])
-    (send 'get-fitness best-member)
-    (send 'get-ast best-member)
-    #;(my-while (< it MAX_ITERATIONS)
-              (begin
-                ;2 Execute each program and ascertain its fitness. Not compile, compile but result not ok, result ok. Use try catch. Count errors by step lexic, semantic, and so on.
-                (set! actual-list-member (foldr (λ (member l)
-                                                  (cons (new-instance class-member 0 (send 'get-ast member) (interp (send 'get-ast member))) l))
-                                                '() (send 'get-member-list init-population)))
-                (set! it (add1 it))))
-    )
-  )
+;select-parents :: class-generation instance -> list (member instance)
+;return selected parents from generation with best fitness
+(define (select-parents generation)
+  (let ([it 0]
+        [member-list (send 'get-member-list generation)]
+        [parents-list '()])
+    (begin
+      (my-while (< it QUANTITY_PARENTS)
+                (cons (tournament-selection member-list) parents-list))
+      parents-list)
+    ))
+
+;tournament-selection :: list (member instance) -> member instance
+;return member with best fitness in selected
+(define (tournament-selection member-list)
+  (let ([it 0]
+        [best-member (car member-list)]
+        [mem-random-select (void)])
+    (begin
+      (my-while (< it TOURNAMENT_NUMBER_ATTEMPTS)
+                (begin
+                  (set! mem-random-select (list-ref member-list (random (length member-list))))
+                  (when (< (send 'get-fitness mem-random-select) (send 'get-fitness best-member))
+                    (set! best-member mem-random-select))))
+      best-member)
+    ))
+
+;reproduction :: list (of member instance) int -> class-generation instance
+;return new generation with members list created from parent-list
+(define (reproduction parents)
+  (let ([it 0]
+        [best-member (new-instance class-member INIT_BEST_FITNESS empty empty)]
+        [child empty]
+        [child-list empty]
+        [mother-random empty]
+        [father-random empty])
+    (begin
+      (my-while (< it QTTY_POPULATION)
+                (begin
+                  (set! mother-random (list-ref parents (random (length parents))))
+                  (set! father-random (list-ref parents (random (length parents))))
+                  (set! child (make-child mother-random father-random))
+                  (cons child child-list)
+                  (when (< (send 'get-fitness child)
+                           (send 'get-fitness best-member))
+                    (set! best-member child))
+                  ))
+      (new-instance class-generation child-list best-member))))
+
+;make-child :: member member -> member
+;return new member instance, apply crossover (child) between mother and father instances, then mutation in new child
+(define (make-child mother father)
+  (let ([child empty])
+    (begin
+      ;TODO represent ast like list
+      ;TODO crossover
+      ;TODO mutation
+      (void)
+      )))
+
+;select-sub-tree :: ast -> ast
+;
