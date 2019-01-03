@@ -33,7 +33,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 
 ;main :: void -> void
 ;execute programming genetic
-(define (main)
+(define (main);TODO implement part II (analize again)
   (letrec ([population (create-population QTTY_POPULATION FIND_VALUE)]
            [chosen-population population]
            [parent-list '()]
@@ -42,9 +42,10 @@ return the best-so-far individual (may be is necessary transform AST to concrete
                    (< it MAX_ITERATIONS)) 
               (begin
                 (set! parent-list (select-parents population))
-                ;TODO reproduction, build new generation
-                ;TODO compare bestmember between chosen-population and new generation
-                ;
+                ;TODO reproduction, build new population
+                ;TODO Define fitness with result or value and/or number of errors. Compare bestmember between chosen-population and new population.
+                ;TODO iterate until reach limits (achieve desired value or max iterations)
+                ;TODO present best member (in chosen population). Print time, ast, final result (concrete sintax)
                 (void))
               )))
 
@@ -158,9 +159,21 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 (define (make-child mother father)
   (let ([child empty])
     (begin
-      ;TODO represent ast like list
-      ;TODO crossover
-      ;TODO mutation
+      ;TODO crossover (use probability param)
+         ;TODO represent ast like list
+             ;TODO create empty list with all nodes
+             ;TODO replace with definition about array binary heap representation (Eytzinger's)
+             ;TODO select point crossover in both parents
+                  ; TODO copy the first parent, mother, in the child (offspring)
+                  ; TODO select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
+                  ; TODO create copy with select father's subtree defined by crossover point in the offspring. Based terminal node or not, only restriccion is complete node (subtree)
+                  ; TODO replace second subtree (prev step) in the child.
+                  ; TODO reflect about generate two offspring in each execution this function
+      
+      ;TODO mutation (use probability param)
+            ; TODO select point in the child
+            ; TODO replace tree with random generated. (crossover idea but with father random tree)
+            ; TODO 
       (void)
       )))
 
