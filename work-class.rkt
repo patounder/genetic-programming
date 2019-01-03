@@ -2,6 +2,7 @@
 ;IMPORTS
 (require "member-dto.rkt")
 (require "interp-service.rkt")
+(require "tree-population-manager.rkt")
 
 
 ;CONSTANTS
@@ -157,12 +158,13 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;make-child :: member member -> member
 ;return new member instance, apply crossover (child) between mother and father instances, then mutation in new child
 (define (make-child mother father)
-  (let ([child empty])
+  (let ([child empty]
+        [mother-like-list (get-nil-ast-height mother)])
     (begin
       ;TODO crossover (use probability param)
          ;TODO represent ast like list
-             ;TODO create empty list with all nodes
-             ;TODO replace with definition about array binary heap representation (Eytzinger's)
+             ;create empty list with all nodes: mother-like-list 
+             ;TODO replace list nodes definition about array binary heap representation (Eytzinger's)
              ;TODO select point crossover in both parents
                   ; TODO copy the first parent, mother, in the child (offspring)
                   ; TODO select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
