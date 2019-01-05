@@ -2,6 +2,10 @@
 (require "interp-service.rkt")
 
 
+;CONSTANTS
+(define NON_TERMINAL_SET '(+ - *))
+(define TERMINAL_SET '(1 2 5 7 9 11))
+
 ;get-heigth :: ast -> int
 ;return ast's height
 (define (get-height ast)
@@ -117,15 +121,52 @@
 
 (test (get-ast-value (add (num 1) (num 5)))
       '+)
-#|
-;complete-ast :: ast -> ast
-;return a complete ast. In case when is already, nothing to do, but in case when is not complete with (empty-node)
-(define (complete-ast ast)
-  
-  )
-(test (complete-ast (add (num 1) (num 3)))
-      (add (num 1) (num 3)))
 
-(test (complete-ast (sub (add (num 1) (num 3)) (num 5)))
-      (add (add (num 1) (num 3)) (num 5))
-|#
+;heigth-sub-tree-list list int int -> int
+;return height given ast like list (official), subtree's root and init height.
+(define (heigth-sub-tree-list ast-list subtree-root init-height)
+  (let ([index-left-child (get-left-child-index subtree-root)]
+        [index-right-child (get-right-child-index subtree-root)])
+    (if (and (and (<= index-left-child (length ast-list))
+                  (<= index-right-child (length ast-list)))
+             (or (not (equal? (list-ref ast-list index-left-child) 'nil))
+                 (not (equal? (list-ref ast-list index-right-child) 'nil))))
+        (max (heigth-sub-tree-list ast-list index-left-child (add1 init-height))
+             (heigth-sub-tree-list ast-list index-right-child (add1 init-height)))
+        init-height)
+    )
+  )
+
+
+(test (heigth-sub-tree-list '(* 11 + nil nil - 7 nil nil nil nil 7 1 nil nil) 2 0)
+      2)
+
+(test (heigth-sub-tree-list '(* 11 + nil nil 7 - nil nil nil nil nil nil 7 1) 2 0)
+      2)
+
+;get-sub-tree :: list int -> list
+;return a sub list given a parent list
+(define (get-sub-tree parent-list new-root-index)
+  (let ([new-root-value (list-ref parent-list new-root-index)])
+    (if (member new-root-value TERMINAL_SET)
+        (list new-root-value)
+        (let([left-tree (get-sub-tree parent-list (get-left-child-index new-root-index))]
+             [right-tree (get-sub-tree parent-list (get-right-child-index new-root-index))])
+          (append (list new-root-value) left-tree right-tree))
+        )
+    ))
+
+(test (get-sub-tree '(1) 0)
+      '(1))
+
+(test (get-sub-tree '(/ 2 3) 1)
+      '(2))
+
+(test (get-sub-tree '(+ 1 - nil nil 2 11) 2)
+      '(- 2 11))
+
+(test (get-sub-tree '(* 11 + nil nil - 7 nil nil nil nil 7 1 nil nil) 2)
+      '(+ - 7 7 1 nil nil))
+
+(test (get-sub-tree '(* 11 + nil nil 7 - nil nil nil nil nil nil 7 1) 2)
+      '(+ 7 - nil nil 7 1))

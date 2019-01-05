@@ -7,8 +7,6 @@
 
 ;CONSTANTS
 (define DEPTH_MAX_AST 3)
-(define NON_TERMINAL_SET '(+ - *))
-(define TERMINAL_SET '(1 2 5 7 9))
 (define FULL_SET (append NON_TERMINAL_SET TERMINAL_SET))
 (define QTTY_POPULATION 3)
 (define MAX_ITERATIONS 100)
@@ -159,15 +157,16 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;return new member instance, apply crossover (child) between mother and father instances, then mutation in new child
 (define (make-child mother father)
   (let ([child empty]
-        [mother-like-list (get-nil-ast-height mother)])
+        #;[mother-like-list (get-nil-ast-height mother)])
     (begin
-      ;TODO crossover (use probability param)
-         ;TODO represent ast like list
-             ;create empty list with all nodes: mother-like-list 
-             ;TODO replace list nodes definition about array binary heap representation (Eytzinger's)
-             ;TODO select point crossover in both parents
-                  ; TODO copy the first parent, mother, in the child (offspring)
-                  ; TODO select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
+      ;TODO crossover (use probability param)      
+      ;represent ast like list. Replace list nodes definition about array binary heap representation (Eytzinger's)
+      (def child (set-ast-values mother (get-nil-ast-height mother) 0))
+      (def father-like-list (set-ast-values father (get-nil-ast-height father) 0))
+      (def crossover-point (random (length child)))
+      (def crossover)
+            ;TODO select point crossover in both parents
+                  ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
                   ; TODO create copy with select father's subtree defined by crossover point in the offspring. Based terminal node or not, only restriccion is complete node (subtree)
                   ; TODO replace second subtree (prev step) in the child.
                   ; TODO reflect about generate two offspring in each execution this function
@@ -178,6 +177,3 @@ return the best-so-far individual (may be is necessary transform AST to concrete
             ; TODO 
       (void)
       )))
-
-;select-sub-tree :: ast -> ast
-;
