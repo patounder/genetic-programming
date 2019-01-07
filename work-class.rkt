@@ -156,20 +156,20 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;make-child :: member member -> member
 ;return new member instance, apply crossover (child) between mother and father instances, then mutation in new child
 (define (make-child mother father)
-  (let ([child empty]
-        #;[mother-like-list (get-nil-ast-height (get-height mother))])
+  (let (#;[mother-like-list (get-nil-ast-height (get-height mother))])
     (begin
-      ;TODO crossover (use probability param)      
-      ;represent ast like list. Replace list nodes definition about array binary heap representation (Eytzinger's)
-      (def child (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
+      ; TODO crossover (use probability param)      
+      ; represent ast like list. Replace list nodes definition about array binary heap representation (Eytzinger's)
+      ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
+      ; create father's subtree defined with root from crossover-point in the offspring.
+      ; clean subtree in the child with crossover-point like root.
+      ; replace second subtree (prev step) in the child.
+      (def child-list (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
       (def father-like-list (set-ast-values father (get-nil-ast-height (get-height father)) 0))
-      (def crossover-point (random (length child)))
-      (def crossover)
-            ;TODO select point crossover in both parents
-                  ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
-                  ; TODO create copy with select father's subtree defined by crossover point in the offspring. Based terminal node or not, only restriccion is complete node (subtree)
-                  ; TODO replace second subtree (prev step) in the child.
-                  ; TODO reflect about generate two offspring in each execution this function
+      (def father-random-subtree (get-sub-tree father-like-list (random (length father-like-list))))
+      (def crossover-point (random (length child-list)))
+      (def clean-child-list (clean-subtree child-list crossover-point))
+      (def new-child (set-value-list clean-child-list crossover-point father-random-subtree 2))
       
       ;TODO mutation (use probability param)
             ; TODO select point in the child

@@ -193,3 +193,27 @@
 
 (test (get-sub-tree '(* 11 + nil nil 7 - nil nil nil nil nil nil 7 1) 2)
       '(+ 7 - nil nil 7 1))
+
+;clean-subtree :: list int -> list
+;return input list but subtree with nil values from index param
+(define (clean-subtree init-list subtree-root)
+  (let ([selected-value (list-ref init-list subtree-root)]
+        [new-list (list-set init-list subtree-root 'nil)]
+        [left-list '()])
+    (if (member selected-value TERMINAL_SET)
+        new-list
+        (begin
+          (set! left-list (clean-subtree new-list (get-left-child-index subtree-root)))
+          (clean-subtree left-list (get-right-child-index subtree-root)))
+        )
+    ))
+
+
+(test (clean-subtree '(1) 0)
+      '(nil))
+
+(test (clean-subtree '(+ 1 2) 1)
+      '(+ nil 2))
+
+(test (clean-subtree '(+ * / 1 2 5 7) 2)
+      '(+ * nil 1 2 nil nil))
