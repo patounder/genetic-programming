@@ -6,6 +6,16 @@
 (define NON_TERMINAL_SET '(+ - *))
 (define TERMINAL_SET '(1 2 5 7 9 11))
 
+;get-left-child-index :: int -> int
+;return left child index
+(define (get-left-child-index index)
+  (+ (* 2 index) 1))
+
+;get-rigth-child-index :: int -> int
+;return right child index
+(define (get-right-child-index index)
+  (+ (* 2 index) 2))
+
 ;get-heigth :: ast -> int
 ;return ast's height
 (define (get-height ast)
@@ -29,18 +39,38 @@
 (test (get-height (add (add (num 1) (mult (num 5) (add (num 4) (num 2)))) (sub (num 3) (num 4))))
       4)
 
-;get-nil-ast-height :: ast -> list
+;heigth-sub-tree-list list int int -> int
+;return height given ast like list (official), subtree's root and init height.
+(define (height-sub-tree-list ast-list subtree-root init-height)
+  (let ([index-left-child (get-left-child-index subtree-root)]
+        [index-right-child (get-right-child-index subtree-root)])
+    (if (and (and (<= index-left-child (length ast-list))
+                  (<= index-right-child (length ast-list)))
+             (or (not (equal? (list-ref ast-list index-left-child) 'nil))
+                 (not (equal? (list-ref ast-list index-right-child) 'nil))))
+        (max (height-sub-tree-list ast-list index-left-child (add1 init-height))
+             (height-sub-tree-list ast-list index-right-child (add1 init-height)))
+        init-height)
+    )
+  )
+
+
+(test (height-sub-tree-list '(* 11 + nil nil - 7 nil nil nil nil 7 1 nil nil) 2 0)
+      2)
+
+(test (height-sub-tree-list '(* 11 + nil nil 7 - nil nil nil nil nil nil 7 1) 2 0)
+      2)
+
+;build-nil-list :: int list -> list
+(define (build-nil-list size lst)
+  (if (equal? size 0)
+      lst
+      (build-nil-list (sub1 size) (cons 'nil lst))))
+
+;get-nil-ast-height :: int -> list
 ;return a list (with nil symbols) and with size defined by ast's height
-(define (get-nil-ast-height ast)
-
-  ;build-nil-list :: int list -> list
-  (define (build-nil-list size lst)
-    (if (equal? size 0)
-        lst
-        (build-nil-list (sub1 size) (cons 'nil lst))))
-
-  (let ([height (get-height ast)]
-        [i 0]
+(define (get-nil-ast-height height)
+  (let ([i 0]
         [k 0]
         [size 0])
     (begin
@@ -52,24 +82,14 @@
     )
   )
 
-(test (get-nil-ast-height (add (num 1) (num 2)))
+(test (get-nil-ast-height (get-height (add (num 1) (num 2))))
       '(nil nil nil))
 
-(test (get-nil-ast-height (add (num 1) (sub (num 3) (num 4))))
+(test (get-nil-ast-height (get-height (add (num 1) (sub (num 3) (num 4)))))
       '(nil nil nil nil nil nil nil))
 
-(test (get-nil-ast-height (add (add (num 1) (mult (num 5) (add (num 4) (num 2)))) (sub (num 3) (num 4))))
+(test (get-nil-ast-height (get-height (add (add (num 1) (mult (num 5) (add (num 4) (num 2)))) (sub (num 3) (num 4)))))
       '(nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil))
-
-;get-left-child-index :: int -> int
-;return left child index
-(define (get-left-child-index index)
-  (+ (* 2 index) 1))
-
-;get-rigth-child-index :: int -> int
-;return right child index
-(define (get-right-child-index index)
-  (+ (* 2 index) 2))
 
 ;set-ast-values :: ast list int-> list
 ;replace (mutation) values from ast in the list (heap binary complete ast representation)
@@ -122,39 +142,13 @@
 (test (get-ast-value (add (num 1) (num 5)))
       '+)
 
-;heigth-sub-tree-list list int int -> int
-;return height given ast like list (official), subtree's root and init height.
-(define (heigth-sub-tree-list ast-list subtree-root init-height)
-  (let ([index-left-child (get-left-child-index subtree-root)]
-        [index-right-child (get-right-child-index subtree-root)])
-    (if (and (and (<= index-left-child (length ast-list))
-                  (<= index-right-child (length ast-list)))
-             (or (not (equal? (list-ref ast-list index-left-child) 'nil))
-                 (not (equal? (list-ref ast-list index-right-child) 'nil))))
-        (max (heigth-sub-tree-list ast-list index-left-child (add1 init-height))
-             (heigth-sub-tree-list ast-list index-right-child (add1 init-height)))
-        init-height)
-    )
-  )
-
-
-(test (heigth-sub-tree-list '(* 11 + nil nil - 7 nil nil nil nil 7 1 nil nil) 2 0)
-      2)
-
-(test (heigth-sub-tree-list '(* 11 + nil nil 7 - nil nil nil nil nil nil 7 1) 2 0)
-      2)
-
 ;get-sub-tree :: list int -> list
 ;return a sub list given a parent list
 (define (get-sub-tree parent-list new-root-index)
-  (let ([new-root-value (list-ref parent-list new-root-index)])
-    (if (member new-root-value TERMINAL_SET)
-        (list new-root-value)
-        (let([left-tree (get-sub-tree parent-list (get-left-child-index new-root-index))]
-             [right-tree (get-sub-tree parent-list (get-right-child-index new-root-index))])
-          (append (list new-root-value) left-tree right-tree))
-        )
-    ))
+  (letrec ([subtree-height (height-sub-tree-list parent-list new-root-index 0)]
+           [subtree (get-nil-ast-height subtree-height)])
+    (void))
+  )
 
 (test (get-sub-tree '(1) 0)
       '(1))

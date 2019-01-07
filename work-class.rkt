@@ -157,12 +157,12 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;return new member instance, apply crossover (child) between mother and father instances, then mutation in new child
 (define (make-child mother father)
   (let ([child empty]
-        #;[mother-like-list (get-nil-ast-height mother)])
+        #;[mother-like-list (get-nil-ast-height (get-height mother))])
     (begin
       ;TODO crossover (use probability param)      
       ;represent ast like list. Replace list nodes definition about array binary heap representation (Eytzinger's)
-      (def child (set-ast-values mother (get-nil-ast-height mother) 0))
-      (def father-like-list (set-ast-values father (get-nil-ast-height father) 0))
+      (def child (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
+      (def father-like-list (set-ast-values father (get-nil-ast-height (get-height father)) 0))
       (def crossover-point (random (length child)))
       (def crossover)
             ;TODO select point crossover in both parents
