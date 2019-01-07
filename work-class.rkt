@@ -71,6 +71,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;return a new instance for class-member-dto with random ast
 (define (create-random-member reference-value)
   (letrec ([ast (grow 0)]
+           ;[ast-list ()]
            [value (interp ast)]
            [fitness (abs (- value reference-value))])
     (new-instance class-member fitness ast value))
@@ -161,7 +162,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
       ; TODO crossover (use probability param)      
       ; represent ast like list. Replace list nodes definition about array binary heap representation (Eytzinger's)
       ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
-      ; create father's subtree defined with root from crossover-point in the offspring.
+      ; TODO create father's subtree defined with root from crossover-point in the offspring, must be contain a height defined with height from crossover point in the child's subtree
       ; clean subtree in the child with crossover-point like root.
       ; replace second subtree (prev step) in the child.
       (def child-list (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
@@ -172,8 +173,17 @@ return the best-so-far individual (may be is necessary transform AST to concrete
       (def new-child (set-value-list clean-child-list crossover-point father-random-subtree 2))
       
       ;TODO mutation (use probability param)
-            ; TODO select point in the child
-            ; TODO replace tree with random generated. (crossover idea but with father random tree)
-            ; TODO 
+            ; TODO select point in the child, and the subtree
+            ; TODO clean subtree with crossover point like root. Like in previous crossover point
+            ; TODO set values in the child or replace tree with random generated. (crossover idea but with father random tree and the maximium height
       (void)
       )))
+
+;mutation :: member -> member
+;return a new instance member with crossover random subtree
+(define (mutation init-mem)
+  ;TODO generate random-ast
+  ;TODO represent random-ast like list
+  
+  (new-instance class-member '() '() '() '())
+  )

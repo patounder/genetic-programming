@@ -126,6 +126,8 @@
 (test (set-ast-values (div (sub (num 5) (num 8)) (num 1)) '(nil nil nil nil nil nil nil)  0)
       '(/ - 1 5 8 nil nil))
 
+;set-list-values :: ast list int-> list
+
 ;get-ast-value :: ast -> value (concrete sintax)
 ;return concrete value from ast node
 (define (get-ast-value ast)
@@ -170,7 +172,7 @@
 
 
 ;get-sub-tree :: list int -> list
-;return a sub list given a parent (list)
+;return a sub list given a parent (list) and int like root
 (define (get-sub-tree original-list root-index)
   (letrec ([subtree-height (height-sub-tree-list original-list root-index 0)]
            [subtree (get-nil-ast-height subtree-height)]
