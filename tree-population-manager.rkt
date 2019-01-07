@@ -142,12 +142,41 @@
 (test (get-ast-value (add (num 1) (num 5)))
       '+)
 
+;set-value-list :: list int list int -> list
+;return a new list with value set in position definated by first int in the first list, given element in the second list by second int index
+(define (set-value-list init-list init-index original-list original-index)
+  (let ([selected-value (list-ref original-list original-index)]
+        [new-list '()]
+        [left-list '()]
+        [right-list '()])
+    (if (member selected-value TERMINAL_SET)
+      (list-set init-list init-index selected-value)
+      (begin
+        (set! new-list (list-set init-list init-index selected-value))
+        (set! left-list (set-value-list new-list (get-left-child-index init-index) original-list (get-left-child-index original-index)))
+        (set! right-list (set-value-list left-list (get-right-child-index init-index) original-list (get-right-child-index original-index)))
+        right-list
+        ))
+  ))
+
+(test (set-value-list '(nil) 0 '(+ 1 2) 2)
+      '(2))
+
+(test (set-value-list '(+ 1 nil) 2 '(+ 1 5) 2)
+      '(+ 1 5))
+
+(test (set-value-list '(nil nil nil) 0 '(+ 1 5) 0)
+      '(+ 1 5))
+
+
 ;get-sub-tree :: list int -> list
-;return a sub list given a parent list
-(define (get-sub-tree parent-list new-root-index)
-  (letrec ([subtree-height (height-sub-tree-list parent-list new-root-index 0)]
-           [subtree (get-nil-ast-height subtree-height)])
-    (void))
+;return a sub list given a parent (list)
+(define (get-sub-tree original-list root-index)
+  (letrec ([subtree-height (height-sub-tree-list original-list root-index 0)]
+           [subtree (get-nil-ast-height subtree-height)]
+           [new-root (list-ref original-list root-index)])
+    (set-value-list subtree 0 original-list root-index)
+    )
   )
 
 (test (get-sub-tree '(1) 0)
