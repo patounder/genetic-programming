@@ -159,31 +159,36 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 (define (make-child mother father)
   (let (#;[mother-like-list (get-nil-ast-height (get-height mother))])
     (begin
-      ; TODO crossover (use probability param)      
-      ; represent ast like list. Replace list nodes definition about array binary heap representation (Eytzinger's)
-      ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
-      ; TODO create father's subtree defined with root from crossover-point in the offspring, must be contain a height defined with height from crossover point in the child's subtree
-      ; clean subtree in the child with crossover-point like root.
-      ; replace second subtree (prev step) in the child.
-      (def child-list (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
-      (def father-like-list (set-ast-values father (get-nil-ast-height (get-height father)) 0))
-      (def father-random-subtree (get-sub-tree father-like-list (random (length father-like-list))))
-      (def crossover-point (random (length child-list)))
-      (def clean-child-list (clean-subtree child-list crossover-point))
-      (def new-child (set-value-list clean-child-list crossover-point father-random-subtree 2))
-      
-      ;TODO mutation (use probability param)
-            ; TODO select point in the child, and the subtree
-            ; TODO clean subtree with crossover point like root. Like in previous crossover point
-            ; TODO set values in the child or replace tree with random generated. (crossover idea but with father random tree and the maximium height
-      (void)
+      (def new-child (crossover mother father))
+      (mutation new-child)
       )))
+
+
+;crossover :: member member -> member
+;return a new member instance with copy and mix genes from params (mother and father)
+(define (crossover mother father)      
+      ; Child ast like list is a copy of his mother. Use binary heap representation (Eytzinger's)
+  (def child-list (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
+  ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
+  (def crossover-point (random (length child-list)))
+  ; TODO create father's subtree defined with root from crossover-point in the offspring, must be contain a height defined with height from crossover point in the child's subtree
+  (def father-like-list (set-ast-values father (get-nil-ast-height (get-height father)) 0))
+  (def father-random-subtree (get-sub-tree father-like-list (random (length father-like-list))))
+  ; clean subtree in the child with crossover-point like root.
+  (def clean-child-list (clean-subtree child-list crossover-point))
+  ; replace second subtree (prev step) in the child.
+  (def new-child (set-value-list clean-child-list crossover-point father-random-subtree 2)))
 
 ;mutation :: member -> member
 ;return a new instance member with crossover random subtree
 (define (mutation init-mem)
-  ;TODO generate random-ast
-  ;TODO represent random-ast like list
-  
+  ;TODO mutation (use probability param)
+      ;TODO select point in the child, and the subtree
+         ;TODO generate random-ast
+         ;TODO represent random-ast like list
+      ;TODO clean subtree with crossover point like root. Like in previous crossover point
+      ;TODO set values in the child or replace tree with random generated. (crossover idea but with father random tree and the maximium height
+      ;TODO generate random-ast
+      ;TODO represent random-ast like list
   (new-instance class-member '() '() '() '())
   )
