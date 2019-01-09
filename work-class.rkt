@@ -167,23 +167,26 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;crossover :: member member -> member
 ;return a new member instance with copy and mix genes from params (mother and father)
 (define (crossover mother father)      
-      ; Child ast like list is a copy of his mother. Use binary heap representation (Eytzinger's)
-  (def child-list (set-ast-values mother (get-nil-ast-height (get-height mother)) 0))
-  ; select point of crossover in the child, and operation on this. Anyone node in the list (obviously not nil). Identify levels in the tree and use for select
-  (def crossover-point (random (length child-list)))
-  ; TODO create father's subtree defined with root from crossover-point in the offspring, must be contain a height defined with height from crossover point in the child's subtree
-  (def father-like-list (set-ast-values father (get-nil-ast-height (get-height father)) 0))
-  (def father-random-subtree (get-sub-tree father-like-list (random (length father-like-list))))
-  ; clean subtree in the child with crossover-point like root.
-  (def clean-child-list (clean-subtree child-list crossover-point))
-  ; replace second subtree (prev step) in the child.
-  (def new-child (set-value-list clean-child-list crossover-point father-random-subtree 2)))
+  (letrec ([child-list (set-ast-values (send 'get-ast mother) (get-nil-ast-height (get-height (send 'get-ast mother))) 0)]
+           [crossover-point (random (length child-list))]
+           ;TODO create father's subtree defined with root from crossover-point in the offspring, must be contain a height defined with height from crossover point in the child's subtree
+           ;TODO remove because list must already exist in the object
+           [father-like-list (set-ast-values (send 'get-ast father) (get-nil-ast-height (get-height (send 'get-ast father))) 0)]
+           [father-random-subtree (get-sub-tree father-like-list (random (length father-like-list)))]
+           [clean-child-list (clean-subtree child-list crossover-point)]
+           )
+    (set-value-list clean-child-list crossover-point father-random-subtree 2)))
+
+(define mother-member (new-instance class-member 0 '(+ 1 2) (add (num 1) (num 2)) 3))
+(define father-member (new-instance class-member 0 '(* + - 1 5 9 7) (mult (add (num 1) (num 5)) (sub (num 9) (num 7))) 10))
+(crossover mother-member father-member)
+      
 
 ;mutation :: member -> member
 ;return a new instance member with crossover random subtree
 (define (mutation init-mem)
   ;TODO mutation (use probability param)
-      ;TODO select point in the child, and the subtree
+         ;TODO select point in the child, and the subtree
          ;TODO generate random-ast
          ;TODO represent random-ast like list
       ;TODO clean subtree with crossover point like root. Like in previous crossover point
