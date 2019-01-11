@@ -210,7 +210,6 @@
         )
     ))
 
-
 (test (clean-subtree '(1) 0)
       '(nil))
 
@@ -219,3 +218,34 @@
 
 (test (clean-subtree '(+ * / 1 2 5 7) 2)
       '(+ * nil 1 2 nil nil))
+
+
+;list-to-ast :: list -> ast
+;return ast list's version
+#|
+(define (list-to-ast ast-list)
+  (void))
+
+
+(test (list-to-ast '(1))
+      (num 1))
+
+(test (list-to-ast '(+ 1 2))
+      (add (num 1) (num 2)))
+
+(test (list-to-ast '(+ * 2 1 2 nil nil))
+      (add (mult (num 1) (num 2)) (num 2)))
+|#
+
+;ast-to-list :: ast -> list
+;return list ast's version
+(define (ast-to-list ast)
+  (set-ast-values ast (get-nil-ast-height (get-height ast)) 0))
+(test (ast-to-list (add (num 4) (num 9)))
+      '(+ 4 9))
+
+(test (ast-to-list (num 4))
+      '(4))
+
+(test (ast-to-list (mult (num 2) (sub (num 9) (num 1))))
+      '(* 2 - nil nil 9 1))

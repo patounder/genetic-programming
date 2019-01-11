@@ -183,7 +183,7 @@ return the best-so-far individual (may be is necessary transform AST to concrete
 ;crossover :: member member -> member
 ;return a new member instance with copy and mix genes from params (mother and father)
 (define (crossover mother father)
-  (letrec ([child-list (set-ast-values (send 'get-ast mother) (get-nil-ast-height (get-height (send 'get-ast mother))) 0)]
+  (letrec ([child-list (ast-to-list (send 'get-ast mother))]
            [crossover-point (random (length child-list))]
            ;TODO create father's subtree defined with root from crossover-point in the offspring, must be contain a height defined with height from crossover point in the child's subtree
            [father-random-subtree (get-sub-tree (send 'get-ast-list father) (random (length (send 'get-ast-list father))))]
