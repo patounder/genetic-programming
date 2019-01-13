@@ -220,22 +220,32 @@
       '(+ * nil 1 2 nil nil))
 
 
-;list-to-ast :: list -> ast
+;list-to-ast :: list index -> ast
 ;return ast list's version
-#|
-(define (list-to-ast ast-list)
-  (void))
 
-
-(test (list-to-ast '(1))
+(define (list-to-ast ast-list index)
+  (let ([s-expr (list-ref ast-list index)])
+    (cond
+      [(number? s-expr) (num s-expr)]
+      [(symbol=? '+ s-expr) (add (list-to-ast ast-list (get-left-child-index index))
+                                 (list-to-ast ast-list (get-right-child-index index)))]
+      [(symbol=? '- s-expr) (sub (list-to-ast ast-list (get-left-child-index index))
+                                 (list-to-ast ast-list (get-right-child-index index)))]
+      [(symbol=? '* s-expr) (mult (list-to-ast ast-list (get-left-child-index index))
+                                  (list-to-ast ast-list (get-right-child-index index)))]
+      [(symbol=? '/ s-expr) (div (list-to-ast ast-list (get-left-child-index index))
+                                 (list-to-ast ast-list (get-right-child-index index)))]
+      ))
+    )
+  
+(test (list-to-ast '(1) 0)
       (num 1))
 
-(test (list-to-ast '(+ 1 2))
+(test (list-to-ast '(+ 1 2) 0)
       (add (num 1) (num 2)))
 
-(test (list-to-ast '(+ * 2 1 2 nil nil))
+(test (list-to-ast '(+ * 2 1 2 nil nil) 0)
       (add (mult (num 1) (num 2)) (num 2)))
-|#
 
 ;ast-to-list :: ast -> list
 ;return list ast's version
